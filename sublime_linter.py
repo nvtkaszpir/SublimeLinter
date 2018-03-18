@@ -119,7 +119,7 @@ class BackendController(sublime_plugin.EventListener):
         # early. This fires a bit too often for 'load_save' mode but it is
         # good enough.
 
-        if persist.settings.get('lint_mode') == 'manual':
+        if persist.settings.get('lint_mode') in ('manual', 'save'):
             return
 
         if not util.is_lintable(view):
@@ -171,6 +171,43 @@ def has_syntax_changed(view):
         return old_value != current_syntax
     finally:
         buffer_syntaxes[bid] = current_syntax
+
+
+class SublimeLinterLintCommand(sublime_plugin.TextCommand):
+    """A command that lints the current view if it has a linter."""
+
+    def is_enabled(self):
+        """
+        Return True if the current view can be linted.
+
+        If the view has *only* file-only linters, it can be linted
+        only if the view is not dirty.
+
+        Otherwise it can be linted.
+        """
+        has_non_file_only_linter = False
+
+        bid = self.view.buffer_id()
+        linters = persist.view_linters.get(bid, [])
+
+        for lint in linters:
+            if lint.tempfile_suffix != '-':
+                has_non_file_only_linter = True
+                break
+
+        if not has_non_file_only_linter:
+            return not self.view.is_dirty()
+
+        return True
+
+    def run(self, edit):
+        """Lint the current view."""
+        hit(self.view)
+
+
+class SublimeLinterConfigChanged(sublime_plugin.ApplicationCommand):
+    def run(self):
+        lint_all_views()
 
 
 def lint_all_views():
@@ -241,8 +278,7 @@ def get_linters_for_view(view):
         for linter_class in persist.linter_classes.values()
         if (
             not linter_class.disabled and
-            linter_class.can_lint_view(view) and
-            linter_class.can_lint()
+            linter_class.can_lint_view(view)
         )
     }
     current_linter_classes = {linter.__class__ for linter in linters}

@@ -92,7 +92,10 @@ For example, to exclude any python files whose name begins with “foo”, you w
         "excludes": "*/foo*.py"
     }
 
-The default value is an empty array.
+The default value is an empty array. 
+Untitled views can be ignored with ``<untitled>``,
+and you can use ``!`` to negate a pattern. 
+Note that :ref:`Settings Expansion <settings-expansion>` can be used here as well.
 
 
 python
@@ -108,15 +111,18 @@ It then executes ``python -m script_name``
 selector
 --------
 
-This takes precedence over deprecated `syntax` property.
-This allows override when given linter is activated for specific file types.
+.. note::
+
+    This takes precedence over the (deprecated) `syntax` property.
+
+This defines if when given linter is activated for specific file types.
 It should be a string containing a list of comma separated selectors.
 
-For example, by default yamllint is activated only for YAML files (`source.yaml`)
-files. But we want to also activate it for ansible files, which are using
-`source.ansible` for selector.
+For example, by default yamllint is activated only for YAML files (``source.yaml``)
+files. But we also want to activate it for ansible files, which have the
+``source.ansible`` scope.
 
-To do that, we can override syntax selector for given linter:
+To do that, we can override the selector for this linter:
 
 .. code-block:: json
 
@@ -124,19 +130,11 @@ To do that, we can override syntax selector for given linter:
         "linters": {
             "yamllint":
             {
-                "selector": "source.yaml,source.ansible"
+                "selector": "source.yaml, source.ansible"
 
             },
         }
     }
 
-To find out what selector to use for given file type, see menu
-`Tools`, `Developer`, `Show Scope Name` and copy value from pop-up window.
-
-Or you can open specific file, place cursor in it and then run below code
-in SublimeText3 console.
-
-.. code-block:: python
-
-    print (view.scope_name(view.sel()[0].b))
-
+To find out what selector to use for given file type, use the
+"Tools > Developer > Show Scope Name" menu entry.

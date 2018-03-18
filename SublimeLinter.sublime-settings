@@ -19,7 +19,7 @@
     // ProjectIcons
     // Note that you may need to change the "icon" property in "styles"
     // to an icon in the theme (they usually include "warning" and "error")
-    "gutter_theme": "none",
+    "gutter_theme": "Default",
 
     // EXPERIMENTAL: See below `demote_while_editing`.
     "highlights.time_to_idle": 5,
@@ -39,6 +39,7 @@
     // background: asynchronously on every change
     // load_save: when a file is opened and every time it's saved
     // manual: only when calling the Lint This View command
+    // save: only when a file is saved
     "lint_mode": "background",
 
     // Example of linter specific settings.
@@ -85,6 +86,13 @@
     // Highlight problems in the minimap.
     "show_marks_in_minimap": true,
 
+    // Show the output panel on save if there are problems.
+    // Note: currently works best with lint_mode "background", See #1200
+    // Set to "window" to check if the window has problems.
+    // Set to "view" to only check the current file.
+    // Set to "never" to disable this feature.
+    "show_panel_on_save": "never",
+
     // Display counters in the status bar.
     // {warning} and {error} will be replaced with the actual numbers.
     // Set to "" to display nothing
@@ -92,8 +100,11 @@
 
     // Show the messages for problems at your cursor position
     // {message} will be replaced by the actual messages.
+    // {linter} will be replaced by the linter reporting the error.
+    // {type} will be replaced by either warning or error.
+    // {code} will be replaced by the error code.
     // Set to "" to display nothing
-    "statusbar.messages_template": "{messages}",
+    "statusbar.messages_template": "{message}",
 
     // Global styles for all linters.
     // - mark_style options:

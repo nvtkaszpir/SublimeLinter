@@ -23,7 +23,7 @@
         },
         "lint_mode":{
             "type":"string",
-            "pattern":"^(background|load_save|manual)$"
+            "pattern":"^(background|load_save|manual|save)$"
         },
         "linters":{
             "type":"object",
@@ -90,6 +90,10 @@
         },
         "show_marks_in_minimap":{
             "type":"boolean"
+        },
+        "show_panel_on_save":{
+            "type":"string",
+            "pattern":"^(never|view|window)$"
         },
         "syntax_map":{
             "type":"object"

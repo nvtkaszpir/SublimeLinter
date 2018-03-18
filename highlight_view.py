@@ -49,7 +49,8 @@ def get_regions_keys(view):
 
 State = {
     'active_view': None,
-    'idle_views': set()
+    'idle_views': set(),
+    'quiet_views': set()
 }
 
 
@@ -62,6 +63,9 @@ def plugin_loaded():
 
 def plugin_unloaded():
     events.off(on_lint_result)
+    for window in sublime.windows():
+        for view in window.views():
+            undraw(view)
 
 
 @events.on(events.LINT_RESULT)
@@ -100,7 +104,8 @@ def on_lint_result(buffer_id, linter_name, **kwargs):
             highlight_regions,
             gutter_regions,
             protected_regions,
-            idle=(view.id() in State['idle_views'])
+            idle=(view.id() in State['idle_views']),
+            quiet=(view.id() in State['quiet_views'])
         )
 
 
@@ -135,7 +140,7 @@ def demote_warnings(selected_text, error_type, **kwargs):
 class IdleViewController(sublime_plugin.EventListener):
     def on_activated_async(self, active_view):
         previous_view = State['active_view']
-        if previous_view.id() != active_view.id():
+        if previous_view and previous_view.id() != active_view.id():
             set_idle(previous_view, True)
 
         State.update({'active_view': active_view})
@@ -165,6 +170,9 @@ class IdleViewController(sublime_plugin.EventListener):
 
 def set_idle(view, idle):
     vid = view.id()
+    if vid in State['quiet_views']:
+        return
+
     current_idle = vid in State['idle_views']
     if idle != current_idle:
         if idle:
@@ -186,6 +194,37 @@ def toggle_demoted_regions(view, show):
 
             regions = view.get_regions(key)
             view.add_regions(key, regions, scope=scope, flags=flags)
+
+
+class SublimeLinterToggleHighlights(sublime_plugin.WindowCommand):
+    def run(self):
+        view = self.window.active_view()
+        vid = view.id()
+        hidden = vid in State['quiet_views']
+        if hidden:
+            State['quiet_views'].discard(vid)
+        else:
+            State['quiet_views'].add(vid)
+
+        toggle_all_regions(view, show=hidden)
+
+
+HIDDEN_SCOPE = ''
+
+
+def toggle_all_regions(view, show):
+    region_keys = get_regions_keys(view)
+    for key in region_keys:
+        if '.Highlights.' not in key:
+            continue
+
+        _namespace, scope, flags = key.split('|')
+        flags = int(flags)
+        if not show:
+            scope = HIDDEN_SCOPE
+
+        regions = view.get_regions(key)
+        view.add_regions(key, regions, scope=scope, flags=flags)
 
 
 def invalidate_regions_under_cursor(view):
@@ -361,8 +400,14 @@ def get_icon_scope(icon, error):
         return "region.whitish"  # hopefully a white color
 
 
+def undraw(view):
+    for key in get_regions_keys(view):
+        view.erase_regions(key)
+    remember_region_keys(view, set())
+
+
 def draw(view, linter_name, highlight_regions, gutter_regions,
-         protected_regions, idle):
+         protected_regions, idle, quiet):
     """
     Draw code and gutter marks in the given view.
 
@@ -393,7 +438,9 @@ def draw(view, linter_name, highlight_regions, gutter_regions,
 
     # otherwise update (or create) regions
     for region_id, (scope, flags, regions) in highlight_regions.items():
-        if not idle and DEMOTE_WHILE_BUSY_MARKER in region_id:
+        if quiet:
+            scope = HIDDEN_SCOPE
+        elif not idle and DEMOTE_WHILE_BUSY_MARKER in region_id:
             scope = get_demote_scope()
         view.add_regions(region_id, regions, scope=scope, flags=flags)
 
