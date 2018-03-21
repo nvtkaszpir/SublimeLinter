@@ -69,6 +69,9 @@ def get_lint_tasks(linters, view, view_has_changed):
         tasks = []
         for region in regions:
             code = view.substr(region)
+            if not code:
+                continue
+
             offset = view.rowcol(region.begin())
 
             # Due to a limitation in python 3.3, we cannot 'name' a thread when
@@ -79,8 +82,8 @@ def get_lint_tasks(linters, view, view_has_changed):
             canonical_filename = (
                 os.path.basename(view.file_name()) if view.file_name()
                 else '<untitled {}>'.format(view.buffer_id()))
-            task_name = 'LintTask|{}|{}|{}'.format(
-                task_number, linter.name, canonical_filename)
+            task_name = 'LintTask|{}|{}|{}|{}'.format(
+                task_number, linter.name, canonical_filename, view.id())
 
             tasks.append(partial(
                 execute_lint_task, linter, code, offset, view_has_changed,

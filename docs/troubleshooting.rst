@@ -1,6 +1,15 @@
 Troubleshooting
 ===============
 
+This page covers a number of common problems and how to debug them.
+If this doesn't help you, look in the
+`GitHub issues <https://github.com/SublimeLinter/SublimeLinter/issues>`_
+for similar issues (also look in the closed issues).
+
+If you end up opening a new issue, please include (relevant) settings and a
+:ref:`debug log <debug-mode>`.
+
+
 .. _debug-mode:
 
 Debug mode
@@ -11,11 +20,11 @@ Among other things it will list if a linter was able to run and its output.
 To enable this mode, set ``"debug"`` to ``true`` in your SublimeLinter settings.
 
 
-The linter doesn’t work!
+The linter doesn't work!
 ------------------------
 When a linter does not work try to run the program from the command line
 (Terminal in Mac OS X/Linux, Command Prompt in Windows).
-If it does not work there, it definitely won’t work in SublimeLinter.
+If it does not work there, it definitely won't work in SublimeLinter.
 
 Here are the most common reasons why a linter does not work:
 
@@ -27,14 +36,11 @@ Here are the most common reasons why a linter does not work:
   setting right now instead of the "syntax_map".
 
 - The linter binary or its dependencies are not installed.
-  Be sure to install the linter as documented in the linter plugin’s README.
+  Be sure to install the linter as documented in the linter plugin's README.
 
 - The linter binary is installed,
   but its path is not available to SublimeLinter.
   Follow the steps in :ref:`debugging-path-problems` below.
-
-Anything else should be searched across GitHub open and closed issues.
-If nothing found then please report new issue.
 
 
 .. _debugging-path-problems:
@@ -48,7 +54,7 @@ There are two possible sources for this information:
 #. The ``"paths"`` setting.
 
 In :ref:`debug mode <debug-mode>` SublimeLinter prints the computed path to the console.
-If a linter’s executable cannot be found, the debug output will include a ``cannot locate <linter>`` message.
+If a linter's executable cannot be found, the debug output will include a ``cannot locate <linter>`` message.
 
 A linter may have additional dependencies (e.g. NodeJS) that may be missing.
 The console should also have information about that.
@@ -93,7 +99,7 @@ Adding to the "paths" setting
 If you cannot rely on the PATH environment variable, paths can be configured
 in SublimeLinter's settings.
 
-For example, let’s say you are using ``rbenv`` on macOS.
+For example, let's say you are using ``rbenv`` on macOS.
 To add the path ``~/.rbenv/shims`` you would change the ``"paths"`` setting like this:
 
 .. code-block:: json
